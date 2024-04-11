@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Metadata -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inhouse LLM</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="../static/style.css">
+  
+</head>
+<body>
+  <!-- Main Container -->
+  <div class="custom-container">
+    <!-- Card Section -->
+    <div class="custom-card">
+      <!-- Card Header -->
+      <div class="custom-card-header">
+        <h1 class="mb-0">InHouse LLM</h1>
+      </div>
+
+      <!-- Navbar Section -->
+      <div class="custom-navbar">
+        <a href="#" onclick="processText('summarize')">Summarize</a>
+        <a href="#" onclick="processText('headline')">Headline</a>
+        <a href="#" onclick="generateQuestions()">Generate Questions</a>
+        <a href="#" onclick="toggleQuestionsInput()">Toggle Questions</a>
+      </div>
+
+      <br><br>
+
+      <!-- Card Body -->
+      <div class="card-body">
+        <!-- Form Section -->
+        <form id="custom-textForm">
+          <!-- Text Input Section -->
+          <div class="custom-form-group">
+            <label for="customTextInput">Enter Text or Upload a File:</label>
+            <textarea class="custom-form-control" id="customTextInput" rows="5" cols="40" placeholder="Paste text or upload a file"></textarea>
+          </div>
+
+          <!-- File Input Section -->
+          <div class="custom-form-group">
+            <label for="customFileInput">Upload Image or PDF:</label>
+            <input class="custom-form-control" type="file" id="customFileInput" />
+          </div>
+          <br><br><br><br><br>
+
+          <!-- Questions Input Section -->
+          <div class="custom-form-group" id="customQuestionsContainer" style="display: none">
+            <label for="customQuestionsInput">Enter Questions (Separate with '\n'):</label>
+            <textarea class="custom-form-control" id="customQuestionsInput" rows="3" placeholder="Enter questions"></textarea>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Output Container -->
+  <div class="custom-card-footer" id="custom-outputContainer">
+    <div class="output-text" id="custom-outputText"></div>
+    <div id="custom-loadingIcon" class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <br><br>
+
+  <!-- Dark Mode Toggle Button -->
+  <button class="dark-mode-toggle" onclick="toggleDarkMode()">Toggle Mode</button>
+
+  <!-- Bootstrap and jQuery Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+  <!-- Custom JavaScript -->
+  <script>
+    function processText(action) {
+      var textInput = document.getElementById("customTextInput").value;
+      var fileInput = document.getElementById("customFileInput").files[0];
+      var questionsInput = document.getElementById("customQuestionsInput").value;
+    
+      document.getElementById("custom-loadingIcon").style.display = "inline-block";
+    
+      var formData = new FormData();
+      formData.append("text", textInput);
+      formData.append("file", fileInput);
+      formData.append("action", action);
+    
+      if (action === "generateQuestions") {
+        formData.append("questionsInput", questionsInput);
+      }
+    
+      $.ajax({
+        url: "/process_text",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          document.getElementById("custom-loadingIcon").style.display = "none";
+          document.getElementById("custom-outputText").innerHTML = data;
+        },
+        error: function (error) {
+          console.error("Error:", error);
+        },
+      });
+    }
+    
+    function toggleQuestionsInput() {
+      var questionsContainer = document.getElementById("customQuestionsContainer");
+      questionsContainer.style.display =
+        questionsContainer.style.display === "none" ? "block" : "none";
+    }
+    
+    function generateQuestions() {
+      processText("generateQuestions");
+    }
+    
+    
+    function toggleDarkMode() {
+      var body = document.body;
+      body.classList.toggle("dark-mode");
+    
+      var navbar = document.querySelector(".custom-navbar");
+      navbar.classList.toggle("dark-mode-navbar");
+    
+      var elementsToToggle = document.querySelectorAll(".custom-card, .custom-form-control, .custom-label, #custom-outputContainer");
+      elementsToToggle.forEach(element => {
+        element.classList.toggle("dark-mode-elements");
+      });
+    
+      // Add or remove dark mode to the body margin
+      body.classList.toggle("dark-mode-body-margin");
+  }
+    
+  </script>
+</body>
+</html>
